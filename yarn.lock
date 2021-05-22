@@ -697,6 +697,11 @@ imurmurhash@^0.1.4:
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
 
+indent@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/indent/-/indent-0.0.2.tgz#8c79f080190559b687034b84c7aefa97d5a911d9"
+  integrity sha1-jHnwgBkFWbaHA0uEx676l9WpEdk=
+
 inflight@^1.0.4:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/inflight/-/inflight-1.0.6.tgz#49bd6331d7d02d0c09bc910a1075ba8165b56df9"

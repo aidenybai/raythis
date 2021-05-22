@@ -1,9 +1,9 @@
 {
-	"name": "screenshotcode",
+	"name": "sc",
 	"displayName": "screenshot code",
 	"description": "basically a modified version of raythis that isn't restrictive",
 	"publisher": "Goopware",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"repository": {
 		"url": "https://github.com/aidenybai/raythis"
 	},
@@ -29,7 +29,7 @@
 		"commands": [
 			{
 				"command": "ray-this.publishSelectedSnippet",
-				"title": "Screenshot code"
+				"title": "Screenshot"
 			}
 		]
 	},
@@ -50,6 +50,7 @@
 		"vscode-test": "^1.5.0"
 	},
 	"dependencies": {
+		"indent": "^0.0.2",
 		"open": "^7.4.2",
 		"prettier": "^2.3.0"
 	}

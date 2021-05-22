@@ -95,31 +95,38 @@ function activate(context) {
 
       // * Generate URL & open in default browser,
       // * then send success message.
-      const filePath = activeTextEditor.document.fileName.split('\\');
-      const formatted = prettier.format(selectedContent, {
-        arrowParens: 'always',
-        bracketSpacing: true,
-        htmlWhitespaceSensitivity: 'css',
-        insertPragma: false,
-        printWidth: 100,
-        proseWrap: 'preserve',
-        quoteProps: 'as-needed',
-        requirePragma: false,
-        semi: true,
-        singleQuote: true,
-        tabWidth: 2,
-        trailingComma: 'es5',
-        useTabs: false,
-        endOfLine: 'lf',
-        parser: 'babel',
-      });
-      const url = generateRayUrl(formatted, {
-        title: filePath[filePath.length - 1] || 'Untitled',
+      const filePath = (activeTextEditor.document.fileName || '\\ ').split('\\') || '';
+      let content = '';
+
+      try {
+        content = prettier.format(selectedContent, {
+          arrowParens: 'always',
+          bracketSpacing: true,
+          htmlWhitespaceSensitivity: 'css',
+          insertPragma: false,
+          printWidth: 100,
+          proseWrap: 'preserve',
+          quoteProps: 'as-needed',
+          requirePragma: false,
+          semi: true,
+          singleQuote: true,
+          tabWidth: 2,
+          trailingComma: 'es5',
+          useTabs: false,
+          endOfLine: 'lf',
+          parser: 'babel',
+        });
+      } catch(_err) {
+        content = selectedContent.trim();
+      }
+
+      const url = generateRayUrl(content, {
+        title: (filePath || ['Untitled'])[filePath.length - 1] || 'Untitled',
         colors: 'candy',
         padding: '32',
       });
 
-      showInformationMessage(`[${url}](${url})`);
+      showInformationMessage(`[Screenshot url](${url})`);
 
       open(url);
     }
