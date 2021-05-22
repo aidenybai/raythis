@@ -1,23 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 
-const open = require("open");
-const vscode = require("vscode");
+const open = require('open');
+const vscode = require('vscode');
+const prettier = require('prettier');
 
-const filetypes = JSON.parse(fs.readFileSync(path.resolve(__dirname, "filetypes.json"), "utf-8"));
+const filetypes = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'filetypes.json'), 'utf-8'));
 
 /**
  * Generates modified Base64 Encoded String
  * @param {String} str - The string to be encoded.
  * @returns {String} Base64 Encoded String
  */
-const generateEncodedCode = str => Buffer.from(str).toString("base64");
+const generateEncodedCode = (str) => Buffer.from(str).toString('base64');
 
 /**
  * Generate a URL from using the script-commands
  * by Raycast as a reference.
  * @param {Object} [options]
-		Query parameters to be used to 
+		Query parameters to be used to
 		construct the completed request.
 	* @param {('candy'|'breeze'|'midnight'|'sunset')} [options.colors]
 		The color scheme you want the
@@ -50,77 +51,79 @@ const generateEncodedCode = str => Buffer.from(str).toString("base64");
 		The snippet of code.
 	* @returns {String} Returns the URL of the snippet.
 */
-const generateRayUrl = (
-	code,
-	options = {}
-) => {
-	const objParams = {...options, code: generateEncodedCode(code), language: getLanguageName()},
-	      parameters = Object.keys(objParams).map(key => 
-			    `${key}=${encodeURIComponent(objParams[key])}`
-	      ).join("&");
-		  
-	return "https://ray.so/?" + parameters;
-}
+const generateRayUrl = (code, options = {}) => {
+  const objParams = { ...options, code: generateEncodedCode(code), language: getLanguageName() },
+    parameters = Object.keys(objParams)
+      .map((key) => `${key}=${encodeURIComponent(objParams[key])}`)
+      .join('&');
 
-function correctIndentation(text) {
-	const lines = text.split("\n");
-	const indents = lines.filter(Boolean).map(line => {
-		return (line.split(/[^\t\s]/)[0] || "").length;
-	});
-	const minimumLength = Math.min(...indents);
-	return lines.map(x => x.slice(minimumLength)).join("\n").trim();
-}
+  return 'https://ray.so/?' + parameters;
+};
 
 function getLanguageName() {
-	const tabFilePath = vscode.window.activeTextEditor.document.fileName;
-	const segments = tabFilePath.split(".");
-	if (!segments.length) return;
-	const extension = segments[segments.length - 1].toLowerCase();
-	const [language] = filetypes.filter(({ extensions }) => extensions.includes(extension));
-	return language ? language.value : "auto";
+  const tabFilePath = vscode.window.activeTextEditor.document.fileName;
+  const segments = tabFilePath.split('.');
+  if (!segments.length) return;
+  const extension = segments[segments.length - 1].toLowerCase();
+  const [language] = filetypes.filter(({ extensions }) => extensions.includes(extension));
+  return language ? language.value : 'auto';
 }
 
 function activate(context) {
-	
-	const publishSelectedSnippet = vscode.commands.registerCommand("ray-this.publishSelectedSnippet", () => {
-		const { 
-			activeTextEditor, 
-			showErrorMessage, 
-			showInformationMessage 
-		} = vscode.window;
+  const publishSelectedSnippet = vscode.commands.registerCommand(
+    'ray-this.publishSelectedSnippet',
+    () => {
+      const { activeTextEditor, showErrorMessage, showInformationMessage } = vscode.window;
 
-		// * If there is no active text editor,
-		// * return an error message.
-		if (!activeTextEditor)
-			return showErrorMessage(
-				`You need to have an open editor to upload a code snippet to Ray.so.
+      // * If there is no active text editor,
+      // * return an error message.
+      if (!activeTextEditor)
+        return showErrorMessage(
+          `You need to have an open editor to upload a code snippet to Ray.so.
 				Please select a file and make a text selection to upload a snippet.`
-			)
-		
-		const selectedContent = activeTextEditor.document.getText(activeTextEditor.selection);
+        );
 
-		// * If there is no selected content,
-		// * return an error message.
-		if (!selectedContent)
-			return showErrorMessage(
-				`You have to have text selected to upload a snippet to Ray.so.
+      const selectedContent = activeTextEditor.document.getText(activeTextEditor.selection);
+
+      // * If there is no selected content,
+      // * return an error message.
+      if (!selectedContent)
+        return showErrorMessage(
+          `You have to have text selected to upload a snippet to Ray.so.
 				Please select the text you would like to be included in your snippet.`
-			);
+        );
 
-		// * Generate URL & open in default browser,
-		// * then send success message.
-		const url = generateRayUrl(correctIndentation(selectedContent), {
-			title: "Uploaded using RayThis Extension",
-			colors: "breeze",
-			padding: "16"
-		});
-		
-		showInformationMessage(
-			`Successfully generated Ray.so snippet!`
-		);
+      // * Generate URL & open in default browser,
+      // * then send success message.
+      const filePath = activeTextEditor.document.fileName.split('\\');
+      const formatted = prettier.format(selectedContent, {
+        arrowParens: 'always',
+        bracketSpacing: true,
+        htmlWhitespaceSensitivity: 'css',
+        insertPragma: false,
+        printWidth: 100,
+        proseWrap: 'preserve',
+        quoteProps: 'as-needed',
+        requirePragma: false,
+        semi: true,
+        singleQuote: true,
+        tabWidth: 2,
+        trailingComma: 'es5',
+        useTabs: false,
+        endOfLine: 'lf',
+        parser: 'babel',
+      });
+      const url = generateRayUrl(formatted, {
+        title: filePath[filePath.length - 1] || 'Untitled',
+        colors: 'candy',
+        padding: '32',
+      });
 
-		open(url);
-	});
+      showInformationMessage(`[${url}](${url})`);
+
+      open(url);
+    }
+  );
 
   context.subscriptions.push(publishSelectedSnippet);
 }
@@ -131,4 +134,4 @@ function deactivate() {}
 module.exports = {
   activate,
   deactivate,
-}
+};
